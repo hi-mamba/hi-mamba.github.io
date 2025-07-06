@@ -17,4 +17,4 @@ markdown: kramdown
 theme: jekyll-theme-cayman  # 或你选的主题
 
 # SEO 设置
-#google_analytics: G-XXXXXXXXXX  # 如果你有 GA，填上即可
+google_analytics: G-YXJRRJZ88R  # 如果你有 GA，填上即可
