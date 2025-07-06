@@ -1,4 +1,20 @@
-title: 我的读书笔记
-description: 分享我对书籍的思考与沉淀
-theme: jekyll-theme-cayman
+title: 我的笔记
+description: 知识沉淀笔记
+url: "https://hi-mamba.github.io"  # 改成你的 GitHub Pages 域名
+baseurl: ""  # 如果是 username.github.io，留空；如果是子目录，比如 /notes，写上
+
+author:
+  name: hi-mamba
+
+# 使用推荐插件
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+  - jekyll-feed
+
+# markdown 渲染
 markdown: kramdown
+theme: jekyll-theme-cayman  # 或你选的主题
+
+# SEO 设置
+#google_analytics: G-XXXXXXXXXX  # 如果你有 GA，填上即可
