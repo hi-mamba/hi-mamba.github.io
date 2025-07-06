@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>K近邻算法为什么需要归一化</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            margin-top: 1.5em;
+            color: #2c3e50;
+        }
+        pre {
+            background: #eee;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        code {
+            background: #f2f2f2;
+            padding: 2px 4px;
+        }
+        .box {
+            background: #fff;
+            padding: 1em;
+            border-left: 5px solid #3498db;
+            margin: 1em 0;
+        }
+    </style>
+</head>
+<body>
+<h1>K近邻算法为什么需要归一化？</h1>
+
+<div class="box">
+    <strong>用户提问：</strong><br>
+    为什么K近邻需要做归一化后的特征矩阵？
+</div>
+
+<h2>✅ 一图胜千言（先感受下例子）</h2>
+<p>假设你有两个特征：</p>
+<ul>
+    <li>身高（cm）：150 ~ 200</li>
+    <li>收入（元/月）：3000 ~ 100000</li>
+</ul>
+<p>如果你用欧几里得距离来判断两个样本的“相似程度”，收入这个特征的数值远大于身高，它就会主导距离结果，让身高几乎不起作用。</p>
+
+<h2>✅ WHY（为什么需要归一化）</h2>
+<p>KNN 是基于“距离”的算法，比如欧几里得距离：</p>
+<pre>d = √[(x₁ - x₂)² + (y₁ - y₂)² + …]</pre>
+<p>如果不同特征的数值范围悬殊，比如“年龄（20~60）”和“年收入（几千~几十万）”，大数值的特征会主导距离结果，导致模型忽略其他特征。</p>
+<p><strong>归一化就是让所有特征在同一尺度上进行比较。</strong></p>
+
+<h2>✅ HOW（怎么归一化）</h2>
+
+<h3>Min-Max 归一化（缩放到 [0,1]）</h3>
+<pre>x_norm = (x - x_min) / (x_max - x_min)</pre>
+
+<h3>Z-score 标准化（标准差归一）</h3>
+<pre>x_std = (x - μ) / σ</pre>
+
+<p>选择标准化方式取决于数据分布是否有离群值、是否服从正态分布等。</p>
+
+<h2>✅ WHAT（归一化带来了什么）</h2>
+<ul>
+    <li>消除了不同特征的量纲影响</li>
+    <li>让模型学习过程更公平准确</li>
+    <li>避免某个特征“数值大”就“更重要”的假象</li>
+</ul>
+
+<h2>✅ HOW TO USE（实际使用）</h2>
+<p>在 sklearn 中使用：</p>
+<pre><code>from sklearn.preprocessing import MinMaxScaler
+from sklearn.neighbors import KNeighborsClassifier
+
+scaler = MinMaxScaler()
+X_norm = scaler.fit_transform(X)
+
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_norm, y)</code></pre>
+
+<h2>✅ 总结一句话</h2>
+<p>
+    <strong>KNN 是靠“距离”判断相似度的算法，而距离对数值变化非常敏感。</strong><br>
+    不做归一化，KNN 就不是在找“最近的邻居”，而是在找“数值大的特征最接近的邻居”。
+</p>
+</body>
+</html>

@@ -1,3 +1,4 @@
-theme: jekyll-theme-minimal
-title: Octocat's homepage
-description: Bookmark this to keep an eye on my project updates!
+title: 我的读书笔记
+description: 分享我对书籍的思考与沉淀
+theme: jekyll-theme-cayman
+markdown: kramdown
