@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>概率公式比较</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 40px;
+            font-size: 2.2em;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .method {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .method:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .simple {
+            border-color: #e53e3e;
+            background: linear-gradient(145deg, #fff5f5, #ffffff);
+        }
+
+        .total {
+            border-color: #38a169;
+            background: linear-gradient(145deg, #f0fff4, #ffffff);
+        }
+
+        .method h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .simple h2 { color: #e53e3e; }
+        .total h2 { color: #38a169; }
+
+        .dataset {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4299e1;
+        }
+
+        .formula {
+            background: #2d3748;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .calculation {
+            background: #edf2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #4299e1;
+        }
+
+        .result {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .visual-demo {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .pie-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .pie-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        .simple-pie {
+            background: conic-gradient(
+                    #e53e3e 0% 30%,
+                    #cbd5e0 30% 100%
+            );
+        }
+
+        .total-pie {
+            background: conic-gradient(
+                    #38a169 0% 24%,
+                    #e53e3e 24% 36%,
+                    #cbd5e0 36% 100%
+            );
+        }
+
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 2px solid #e17055;
+        }
+
+        .highlight h3 {
+            color: #d63031;
+            margin-top: 0;
+        }
+
+        .email-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            margin: 15px 0;
+        }
+
+        .email-item {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .spam { background: #e53e3e; }
+        .normal { background: #38a169; }
+        .target { background: #f39c12; border: 3px solid #e74c3c; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📊 简单概率 vs 全概率公式在邮件分类中的区别</h1>
+
+    <div class="dataset">
+        <h3>📧 数据集示例（总共100封邮件）</h3>
+        <div class="email-grid">
+            <!-- 垃圾邮件 40封 -->
+            <div class="email-item spam">垃</div>
+            <div class="email-item spam">圾</div>
+            <div class="email-item spam">垃</div>
+            <div class="email-item spam">圾</div>
+            <div class="email-item spam">垃</div>
+            <div class="email-item spam">圾</div>
+            <div class="email-item spam">垃</div>
+            <div class="email-item spam">圾</div>
+            <div class="email-item spam">垃</div>
+            <div class="email-item spam">圾</div>
+
+            <!-- 正常邮件 60封 -->
+            <div class="email-item normal">正</div>
+            <div class="email-item normal">常</div>
+            <div class="email-item normal">正</div>
+            <div class="email-item normal">常</div>
+            <div class="email-item normal">正</div>
+            <div class="email-item normal">常</div>
+            <div class="email-item normal">正</div>
+            <div class="email-item normal">常</div>
+            <div class="email-item normal">正</div>
+            <div class="email-item normal">常</div>
+
+            <!-- 更多邮件用点表示 -->
+            <div style="grid-column: span 10; text-align: center; color: #666;">
+                ... 其中包含"优惠"词汇的邮件有30封 ...
+            </div>
+        </div>
+        <p><strong>关键信息：</strong></p>
+        <ul>
+            <li>垃圾邮件：40封 (40%)</li>
+            <li>正常邮件：60封 (60%)</li>
+            <li>包含"优惠"的邮件：30封</li>
+            <li>垃圾邮件中包含"优惠"：24封</li>
+            <li>正常邮件中包含"优惠"：6封</li>
+        </ul>
+    </div>
+
+    <div class="comparison">
+        <div class="method simple">
+            <h2>❌ 简单概率公式</h2>
+
+            <div class="formula">
+                P(优惠) = 包含"优惠"的邮件数 / 总邮件数
+            </div>
+
+            <div class="calculation">
+                <h4>计算过程：</h4>
+                <p>P(优惠) = 30/100 = 0.30 = <strong>30%</strong></p>
+            </div>
+
+            <h4>问题分析：</h4>
+            <ul>
+                <li>只看总体频率，忽略类别信息</li>
+                <li>无法区分不同类别中的分布差异</li>
+                <li>对分类决策帮助有限</li>
+            </ul>
+
+            <div class="result">
+                简单结果：30%的邮件包含"优惠"
+                <br>但这对分类没有直接帮助！
+            </div>
+        </div>
+
+        <div class="method total">
+            <h2>✅ 全概率公式</h2>
+
+            <div class="formula">
+                P(优惠) = P(优惠|垃圾)×P(垃圾) + P(优惠|正常)×P(正常)
+            </div>
+
+            <div class="calculation">
+                <h4>计算过程：</h4>
+                <p><strong>步骤1：</strong>计算条件概率</p>
+                <ul>
+                    <li>P(优惠|垃圾) = 24/40 = 0.60 = <strong>60%</strong></li>
+                    <li>P(优惠|正常) = 6/60 = 0.10 = <strong>10%</strong></li>
+                </ul>
+
+                <p><strong>步骤2：</strong>计算先验概率</p>
+                <ul>
+                    <li>P(垃圾) = 40/100 = <strong>40%</strong></li>
+                    <li>P(正常) = 60/100 = <strong>60%</strong></li>
+                </ul>
+
+                <p><strong>步骤3：</strong>应用全概率公式</p>
+                <p>P(优惠) = 0.60×0.40 + 0.10×0.60</p>
+                <p>= 0.24 + 0.06 = <strong>30%</strong></p>
+            </div>
+
+            <h4>优势分析：</h4>
+            <ul>
+                <li>揭示了类别间的显著差异</li>
+                <li>垃圾邮件中60%包含"优惠"</li>
+                <li>正常邮件中仅10%包含"优惠"</li>
+                <li>为贝叶斯分类提供了有用信息</li>
+            </ul>
+
+            <div class="result">
+                全概率结果：同样是30%，但提供了<br>
+                垃圾邮件(60%)和正常邮件(10%)的分布信息！
+            </div>
+        </div>
+    </div>
+
+    <div class="visual-demo">
+        <h2>🎯 可视化对比</h2>
+
+        <div class="pie-container">
+            <div>
+                <h3>简单概率视角</h3>
+                <div class="pie-chart simple-pie">
+                    30%
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e53e3e;"></div>
+                        <span>包含"优惠"(30%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #cbd5e0;"></div>
+                        <span>不包含"优惠"(70%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3>全概率视角</h3>
+                <div class="pie-chart total-pie">
+                    30%
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #38a169;"></div>
+                        <span>垃圾邮件中的"优惠"(24%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #e53e3e;"></div>
+                        <span>正常邮件中的"优惠"(6%)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #cbd5e0;"></div>
+                        <span>不包含"优惠"(70%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="highlight">
+        <h3>🔑 关键洞察</h3>
+        <p><strong>为什么全概率公式更适合分类？</strong></p>
+        <ol>
+            <li><strong>信息丰富性：</strong>全概率公式分解了总概率，揭示了特征在不同类别中的分布模式</li>
+            <li><strong>决策支持：</strong>知道"优惠"在垃圾邮件中出现概率是60%，在正常邮件中只有10%，这为分类提供了强有力的证据</li>
+            <li><strong>贝叶斯推理：</strong>这些条件概率直接用于贝叶斯公式计算后验概率，实现精确分类</li>
+        </ol>
+
+        <p><strong>实际应用中：</strong></p>
+        <p>当收到一封包含"优惠"的新邮件时，我们可以利用P(优惠|垃圾)=60% 和 P(优惠|正常)=10% 的巨大差异，结合先验概率，准确判断这封邮件更可能是垃圾邮件。</p>
+    </div>
+</div>
+</body>
+</html>

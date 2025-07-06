@@ -167,3 +167,7 @@ Whether you need a cutting-edge website, a productivity-boosting Chrome extensio
 *Crafting Digital Excellence Since 2020*
 
 </div>
+
+
+## 本地运行生成目录结构：
+> node updateSidebarTreeIncremental.js
