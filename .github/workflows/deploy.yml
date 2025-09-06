@@ -3,15 +3,16 @@ name: Build and Deploy Markdown to GitHub Pages
 on:
   push:
     branches: [main]
-# 在job级别添加权限
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    # 👇 添加这个 permissions 模块
+    permissions:
+      contents: write # 授予 GITHUB_TOKEN 向仓库写入内容的权限
+      pages: write
+      id-token: write
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
