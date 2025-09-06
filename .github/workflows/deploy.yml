@@ -35,17 +35,11 @@ jobs:
      #    personal_token: ${{ secrets.PERSONAL_TOKEN }}  # 使用personal token
      #    publish_dir: ./public
      #
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: './public'
-
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+        uses: peaceiris/actions-gh-pages@v4  # 更新到v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
 
     # Add a step to generate the sidebar
       - name: Checkout repo
