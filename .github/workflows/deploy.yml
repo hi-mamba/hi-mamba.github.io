@@ -28,20 +28,9 @@ jobs:
             filename=$(basename "$file" .md)
             pandoc "$file" -o "public/${filename}.html"
           done
+      
 
-     #- name: Deploy to GitHub Pages
-     #  uses: peaceiris/actions-gh-pages@v3
-     #  with:
-     #    personal_token: ${{ secrets.PERSONAL_TOKEN }}  # 使用personal token
-     #    publish_dir: ./public
-     #
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4  # 更新到v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-
-    # Add a step to generate the sidebar
+      # Add a step to generate the sidebar
       - name: Checkout repo
         uses: actions/checkout@v3
 
@@ -60,3 +49,9 @@ jobs:
           git add notes/_sidebar.md
           git commit -m "chore: update sidebar" || echo "No changes"
           git push
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4  # 更新到v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
