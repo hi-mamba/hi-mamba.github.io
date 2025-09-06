@@ -3,6 +3,11 @@ name: Build and Deploy Markdown to GitHub Pages
 on:
   push:
     branches: [main]
+# 在job级别添加权限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -24,11 +29,23 @@ jobs:
             pandoc "$file" -o "public/${filename}.html"
           done
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+     #- name: Deploy to GitHub Pages
+     #  uses: peaceiris/actions-gh-pages@v3
+     #  with:
+     #    personal_token: ${{ secrets.PERSONAL_TOKEN }}  # 使用personal token
+     #    publish_dir: ./public
+     #
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
         with:
-          personal_token: ${{ secrets.PERSONAL_TOKEN }}  # 使用personal token
-          publish_dir: ./public
+          path: './public'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
 
     # Add a step to generate the sidebar
       - name: Checkout repo
