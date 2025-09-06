@@ -200,7 +200,8 @@ function run() {
                     const fileIndentLevel = (parentPath ? parentPath.split("/").length : 0) + 1;
                     const indent = INDENT.repeat(fileIndentLevel);
 
-                    newLines.push(`${indent}- [${n.name}](${normalizeRel(path.join(NOTES_DIR, n.path))})`);
+                   // newLines.push(`${indent}- [${n.name}](${normalizeRel(path.join(NOTES_DIR, n.path))})`);
+                    newLines.push(`${indent}- [${n.name}](${safeUrl(n.path)})`);
                     linkPathSet.add("./" + n.path);
                 }
             }
@@ -222,5 +223,16 @@ function run() {
     fs.writeFileSync(SIDEBAR, lines.join("\n").replace(/\r?\n\s*$/,"") + "\n", "utf-8");
     console.log(`✅ _sidebar.md 已增量更新（新增 ${newLines.length} 条）`);
 }
+
+function safeUrl(relPath) {
+    const norm = "./" + relPath.replace(/\\/g, "/");
+    return norm.split("/").map((seg, i) => {
+        if (i === 0 && seg === ".") return seg;
+        // 只转义特殊字符，不转义中文
+        return seg.replace(/[^a-zA-Z0-9\u4e00-\u9fa5._-]/g, ch => encodeURIComponent(ch));
+    }).join("/");
+}
+
+
 
 run();
