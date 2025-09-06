@@ -1,4 +1,3 @@
 - [Happy-LLM](./README.md)
     - [前言](./前言.md)
     - [《knn》笔记](./knn_normalization.html))
-    - [简单概率 vs 全概率公式在邮件分类中的区别](./简单概率 vs 全概率公式在邮件分类中的区别.html)
