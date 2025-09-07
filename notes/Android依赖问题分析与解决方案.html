@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Android依赖问题分析与解决方案</title>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: #333;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 28px;
+            text-align: center;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 22px;
+            border-left: 4px solid #4caf50;
+            padding-left: 10px;
+            margin-top: 30px;
+        }
+
+        /* 容器 */
+        .container {
+            max-width: 900px;
+            background: #fff;
+            margin: 20px auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        /* 错误区 */
+        .error-message {
+            font-size: 15px;
+            color: #333;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        .error-message pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .error-message code {
+            background: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+            color: #c7254e;
+        }
+
+        .missing-lib {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+
+        .dependency-info {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        /* 列表 */
+        ul, ol {
+            margin: 15px 0 15px 25px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        /* 代码块 */
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        code {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 14px;
+        }
+
+        /* 备注 */
+        .note {
+            font-style: italic;
+            color: #757575;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>解决 Gradle 错误：Could not find androidx.appcompat:appcompat:1.7.1</h1>
+
+    <div class="error-container">
+        <div class="error-header">Build Execution Failed</div>
+
+        <div class="error-message">
+            <p><strong>Task:</strong> <code>:app:checkDebugAarMetadata</code></p>
+            <p><strong>Issue:</strong> Could not resolve all files for configuration <code>:app:debugRuntimeClasspath</code></p>
+
+            <p><strong>Details:</strong></p>
+            <pre>
+Could not resolve all dependencies for configuration ':app:debugRuntimeClasspath'.
+Could not find <span class="missing-lib">androidx.appcompat:appcompat:1.7.1</span>.
+Searched in the following locations:
+        </pre>
+
+            <div class="dependency-info">
+                <ul class="location-list">
+                    <li><code>file:/C:/Users/OS/.m2/repository/androidx/appcompat/appcompat/1.7.1/appcompat-1.7.1.pom</code></li>
+                    <li><code>https://maven.aliyun.com/repository/public/androidx/appcompat/appcompat/1.7.1/appcompat-1.7.1.pom</code></li>
+                    <li><code>https://repo.maven.apache.org/maven2/androidx/appcompat/appcompat/1.7.1/appcompat-1.7.1.pom</code></li>
+                </ul>
+            </div>
+            <p><strong>Required by:</strong> project <code>:app</code></p>
+        </div>
+
+        <div class="note">
+            中央仓库也没有？但是 GOOGLE 是有这个版本。
+        </div>
+    </div>
+    <h2>问题分析</h2>
+    <p>从错误日志可以看到，Gradle 只在以下位置搜索：</p>
+    <ul>
+        <li>本地 .m2 仓库</li>
+        <li>阿里云镜像</li>
+        <li>Maven 中央仓库</li>
+    </ul>
+    <p>但没有搜索 Google 仓库！ 这就是问题所在。</p>
+
+    <h2>解决方案</h2>
+    <ol>
+        <li><strong>确保 Google 仓库配置正确</strong></li>
+        <p>在项目根目录的 build.gradle 中：</p>
+        <pre><code class="groovy">allprojects {
+    repositories {
+        google() // 必须在前面！
+        mavenCentral()
+        maven { url 'https://maven.aliyun.com/repository/public' }
+    }
+}</code></pre>
+
+        <p>或者如果使用 settings.gradle (较新的 Gradle 版本)：</p>
+        <pre><code class="groovy">dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google() // 必须包含！
+        mavenCentral()
+        maven { url 'https://maven.aliyun.com/repository/public' }
+    }
+}</code></pre>
+
+        <li><strong>如果网络问题，使用阿里云的 Google 镜像</strong></li>
+        <pre><code class="groovy">allprojects {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/google' } // Google 镜像
+        maven { url 'https://maven.aliyun.com/repository/central' } // Central 镜像
+        google() // 备用
+        mavenCentral() // 备用
+    }
+}</code></pre>
+
+        <li><strong>检查是否有仓库过滤或排除设置</strong></li>
+        <pre><code># 删除这类可能干扰仓库访问的设置
+# android.enableR8.fullMode=true</code></pre>
+
+        <li><strong>强制刷新依赖</strong></li>
+        <pre><code>./gradlew clean --refresh-dependencies
+./gradlew build</code></pre>
+
+        <li><strong>验证版本存在性</strong></li>
+        <p>手动验证该版本确实存在：<a href="https://maven.google.com/web/index.html">Google 仓库</a></p>
+
+        <li><strong>临时使用其他版本</strong></li>
+        <pre><code>implementation 'androidx.appcompat:appcompat:1.7.0'
+// 或
+implementation 'androidx.appcompat:appcompat:1.6.1'</code></pre>
+    </ol>
+</div>
+</body>
+</html>
