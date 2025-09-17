@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>负载均衡算法交互演示器</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; }
+        .container { max-width: 1400px; margin: auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .main-content { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+        .control-panel { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .servers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 15px; }
+        .server-card { border: 2px solid #ddd; border-radius: 8px; padding: 10px; transition: 0.3s; }
+        .server-card.selected { border-color: #667eea; background: #f0f8ff; }
+        .btn { background: #667eea; color: #fff; border: none; padding: 8px 15px; margin-top: 5px; border-radius: 6px; cursor: pointer; }
+        .btn-danger { background: #e74c3c; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 15px; margin-top: 20px; }
+        .stat-card { background: #fff; padding: 15px; border-radius: 8px; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 20px; font-weight: bold; color: #667eea; }
+        .request-log { background: #000; color: #0f0; padding: 10px; height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px; border-radius: 8px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🚀 负载均衡算法交互演示器</h1>
+        <p>实时体验五种核心负载均衡算法的工作原理与性能表现</p>
+    </div>
+
+    <div class="main-content">
+        <!-- 左侧控制面板 -->
+        <div class="control-panel">
+            <h3>⚙️ 算法配置</h3>
+            <select id="algorithm">
+                <option value="roundRobin">轮询 (Round Robin)</option>
+                <option value="weightedRoundRobin">加权轮询 (Weighted)</option>
+                <option value="leastConnections">最少连接 (Least Conn)</option>
+                <option value="ipHash">IP哈希 (IP Hash)</option>
+                <option value="leastResponseTime">最短响应时间 (LRT)</option>
+            </select>
+
+            <div style="margin-top: 15px;">
+                <label>请求数量: <input id="requestCount" type="number" value="10" min="1" max="1000"></label><br>
+                <label>间隔(ms): <input id="requestInterval" type="number" value="500" min="100" max="5000"></label><br>
+                <button class="btn" onclick="sendRequests()">🚀 发送请求</button>
+                <button class="btn" onclick="sendSingleRequest()">📤 单次请求</button>
+                <button class="btn btn-danger" onclick="stopRequests()">⏹ 停止</button>
+            </div>
+
+            <h3 style="margin-top:20px;">🔧 服务器管理</h3>
+            <button class="btn" onclick="addServer()">➕ 添加服务器</button>
+            <button class="btn btn-danger" onclick="removeServer()">➖ 移除服务器</button>
+            <button class="btn" onclick="resetStats()">🔄 重置统计</button>
+        </div>
+
+        <!-- 右侧演示区 -->
+        <div>
+            <div class="servers-grid" id="serversGrid"></div>
+
+            <div class="stats-grid">
+                <div class="stat-card"><span id="totalRequests" class="stat-value">0</span><div>总请求数</div></div>
+                <div class="stat-card"><span id="avgResponseTime" class="stat-value">0ms</span><div>平均响应时间</div></div>
+                <div class="stat-card"><span id="activeConnections" class="stat-value">0</span><div>活跃连接数</div></div>
+                <div class="stat-card"><span id="errorRate" class="stat-value">0%</span><div>错误率</div></div>
+            </div>
+
+            <div class="request-log" id="requestLog">🖥️ 等待请求中...</div>
+
+            <canvas id="distributionChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    class LoadBalancer {
+        constructor() {
+            this.servers = [
+                {id:1, name:"Server-1", weight:3, connections:0, totalRequests:0, totalResponseTime:0, errors:0, online:true},
+                {id:2, name:"Server-2", weight:2, connections:0, totalRequests:0, totalResponseTime:0, errors:0, online:true},
+                {id:3, name:"Server-3", weight:1, connections:0, totalRequests:0, totalResponseTime:0, errors:0, online:true}
+            ];
+            this.totalRequests = 0;
+            this.currentIndex = 0;
+            this.interval = null;
+            this.chart = new Chart(document.getElementById("distributionChart"), {
+                type:"bar",
+                data:{labels:this.servers.map(s=>s.name), datasets:[{label:"请求数", data:this.servers.map(s=>0), backgroundColor:"#667eea"}]},
+                options:{responsive:true, scales:{y:{beginAtZero:true}}}
+            });
+            this.render();
+        }
+
+        pickServer(algorithm, clientIp="192.168.0.1") {
+            const online = this.servers.filter(s=>s.online);
+            if(online.length===0) return null;
+            if(algorithm==="roundRobin") {
+                const s = online[this.currentIndex % online.length];
+                this.currentIndex++;
+                return s;
+            }
+            if(algorithm==="weightedRoundRobin") {
+                const totalWeight = online.reduce((a,b)=>a+b.weight,0);
+                const r = Math.floor(Math.random()*totalWeight);
+                let sum=0;
+                for(const s of online){ sum+=s.weight; if(r<sum) return s; }
+            }
+            if(algorithm==="leastConnections") {
+                return online.reduce((a,b)=> a.connections<=b.connections?a:b);
+            }
+            if(algorithm==="ipHash") {
+                const hash = [...clientIp].reduce((a,c)=>a+c.charCodeAt(0),0);
+                return online[hash % online.length];
+            }
+            if(algorithm==="leastResponseTime") {
+                return online.reduce((a,b)=>{
+                    const aRT = a.totalRequests? a.totalResponseTime/a.totalRequests : 0;
+                    const bRT = b.totalRequests? b.totalResponseTime/b.totalRequests : 0;
+                    return aRT<=bRT? a:b;
+                });
+            }
+        }
+
+        handleRequest(algorithm) {
+            const server = this.pickServer(algorithm, document.getElementById("clientIp")?.value || "192.168.0.1");
+            if(!server) return;
+            this.totalRequests++;
+            server.totalRequests++;
+            server.connections++;
+            const rt = Math.floor(Math.random()*200)+50;
+            server.totalResponseTime += rt;
+            setTimeout(()=>server.connections--, rt);
+            this.log(`请求分配到 ${server.name}, 响应时间 ${rt}ms`);
+            this.updateStats();
+        }
+
+        render() {
+            const grid = document.getElementById("serversGrid");
+            grid.innerHTML="";
+            this.servers.forEach(s=>{
+                const div=document.createElement("div");
+                div.className="server-card";
+                div.innerHTML=`<b>${s.name}</b><br>权重:${s.weight}<br>请求数:${s.totalRequests}<br>连接数:${s.connections}`;
+                grid.appendChild(div);
+            });
+            this.chart.data.labels=this.servers.map(s=>s.name);
+            this.chart.data.datasets[0].data=this.servers.map(s=>s.totalRequests);
+            this.chart.update();
+        }
+
+        log(msg) {
+            const log=document.getElementById("requestLog");
+            log.innerHTML += "\n" + msg;
+            log.scrollTop=log.scrollHeight;
+        }
+
+        updateStats() {
+            document.getElementById("totalRequests").innerText=this.totalRequests;
+            const totalRT=this.servers.reduce((a,s)=>a+s.totalResponseTime,0);
+            const totalReq=this.servers.reduce((a,s)=>a+s.totalRequests,0);
+            document.getElementById("avgResponseTime").innerText= totalReq? (totalRT/totalReq).toFixed(1)+"ms":"0ms";
+            document.getElementById("activeConnections").innerText= this.servers.reduce((a,s)=>a+s.connections,0);
+            document.getElementById("errorRate").innerText="0%";
+            this.render();
+        }
+    }
+
+    const lb=new LoadBalancer();
+
+    function sendRequests(){
+        const n=+document.getElementById("requestCount").value;
+        const interval=+document.getElementById("requestInterval").value;
+        const algo=document.getElementById("algorithm").value;
+        let count=0;
+        lb.interval=setInterval(()=>{
+            lb.handleRequest(algo);
+            count++;
+            if(count>=n) stopRequests();
+        },interval);
+    }
+    function sendSingleRequest(){ lb.handleRequest(document.getElementById("algorithm").value); }
+    function stopRequests(){ if(lb.interval) clearInterval(lb.interval); }
+    function addServer(){ const id=lb.servers.length+1; lb.servers.push({id,name:"Server-"+id,weight:1,connections:0,totalRequests:0,totalResponseTime:0,errors:0,online:true}); lb.render(); }
+    function removeServer(){ lb.servers.pop(); lb.render(); }
+    function resetStats(){ lb.servers.forEach(s=>{s.connections=0;s.totalRequests=0;s.totalResponseTime=0;}); lb.totalRequests=0; lb.render(); }
+</script>
+</body>
+</html>
