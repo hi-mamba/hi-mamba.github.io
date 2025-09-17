@@ -12,3 +12,7 @@
 - [《人类简史》笔记](./notes/sapiens.md)
 - [《原则》笔记](./notes/principles.md)
 - [《knn》笔记](./notes/knn_normalization.html))
+
+- [简单概率 vs 全概率公式在邮件分类中的区别](./notes/简单概率%20vs%20全概率公式在邮件分类中的区别.html)
+- [可完整运行的负载均衡交互演示器](./notes/可完整运行的负载均衡交互演示器.html)
+- [Android依赖问题分析与解决方案](./notes/Android依赖问题分析与解决方案.html)
